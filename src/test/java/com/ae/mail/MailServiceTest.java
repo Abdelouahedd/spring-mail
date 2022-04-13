@@ -9,12 +9,11 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-
-import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 @SpringBootTest
 @Log4j2
@@ -28,16 +27,18 @@ class MailServiceTest {
 
 
   @Test
-  void sendMail() throws MessagingException, IOException {
+  void sendMail() {
     Email email = new Email();
     email.setContent("Hello world !!");
     email.setSubject("Hello world");
     email.setTo("reciever@hotmail.fr");
     email.setFrom("sender@hotmail.fr");
     mailService.sendMail(email);
-    MimeMessage receivedMessage = greenMail.getReceivedMessages()[0];
-    assertEquals(1, greenMail.getReceivedMessages().length);
-    assertEquals("Hello world", receivedMessage.getSubject());
-    assertEquals("Hello world !!\n".trim(), receivedMessage.getContent().toString().trim());
+    await().atMost(2, TimeUnit.SECONDS).untilAsserted(() -> {
+      MimeMessage receivedMessage = greenMail.getReceivedMessages()[0];
+      assertEquals(1, greenMail.getReceivedMessages().length);
+      assertEquals("Hello world", receivedMessage.getSubject());
+      assertEquals("Hello world !!\n".trim(), receivedMessage.getContent().toString().trim());
+    });
   }
 }
