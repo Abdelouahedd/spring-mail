@@ -71,7 +71,8 @@ Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) an
 
 ```bash
 #Before use the repo run container of mail host for testing
-$ docker run --name=mailsmtp -p 1025:1025 -p 8025:8025 mailhog/mailhog:v1.0.1
+$ docker network create mail-network
+$ docker run --name=mailsmtp --network=mail-network -p 1025:1025 -p 8025:8025 mailhog/mailhog:v1.0.1
 
 # Clone this project
 $ git clone https://github.com/Abdelouahedd/spring-mail
@@ -83,7 +84,7 @@ $ cd spring-mail
 $ docker build -t spring-mail .
 
 #run container
-$ docker run --name=mailtest -d -p 8080:8080 spring-mail  
+$ docker run --name=mailtest -e SPRING.MAIL.HOST="mailsmtp" --network=mail-network -d -p 8080:8080 spring-mail  
 
 # The server will initialize in the <http://localhost:8080>
 ```
